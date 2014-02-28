@@ -1,5 +1,7 @@
 # Flox Tools for Ruby
 
+[![Gem Version](https://badge.fury.io/rb/flox.png)](http://badge.fury.io/rb/flox)
+
 ## What is Flox?
 
 Flox is a server backend especially for game developers, providing all the basics you need for a game: analytics, leaderboards, custom entities, and much more. The focus of Flox lies on its scalability (guaranteed by running in the Google App Engine) and ease of use.
