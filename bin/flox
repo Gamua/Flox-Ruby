@@ -1,0 +1,102 @@
+#!/usr/bin/env ruby
+
+## Author:    Daniel Sperl
+## Copyright: Copyright 2014 Gamua
+## License:   Simplified BSD
+
+$LOAD_PATH << '../lib'
+
+require 'flox'
+require 'fileutils'
+require 'trollop'
+
+class Worker
+
+  attr_reader :flox
+
+  def initialize(game_id, game_key, base_url)
+    @flox = Flox.new(game_id, game_key, base_url)
+  end
+
+  def login_with_key(key)
+    flox.login_with_key(key)
+  end
+
+  def execute(command_name, args)
+    begin
+      method_name = command_name.downcase.gsub("-", "_")
+      self.send(method_name, **args)
+    rescue Exception => e
+      log "Error: " + e.to_s
+    end
+  end
+
+  private
+
+  def download_logs(args={})
+    query = args[:query]
+    limit = args[:limit]
+    destination = args[:destination] || Dir.pwd
+    FileUtils.mkdir_p(destination)
+
+    log "Fetching Logs ..."
+    log_ids = flox.load_log_ids(query, limit)
+    log_ids.each do |log_id|
+      remote_path = "logs/#{log_id}"
+      local_path = File.join(destination, log_id) + ".json"
+      load_and_save_resource(remote_path, local_path)
+    end
+  end
+
+  def status(args={})
+    log "Fetching Server Status ..."
+    status = flox.status
+    log "Version: #{status['version']}, status: #{status['status']}"
+  end
+
+  def log(message)
+    puts message
+  end
+
+  def fail(message)
+    log message
+    exit
+  end
+
+  def load_and_save_resource(remote_path, local_path)
+    if (File.exists? local_path)
+      log("Skipped #{local_path} (file exists)")
+    else
+      resource = flox.load_resource(remote_path)
+      File.write(local_path, JSON.pretty_generate(resource))
+      log("Saved #{local_path}")
+    end
+  end
+
+end
+
+options = Trollop::options do
+  banner "Administrative utility for the Flox.cc Game Backend"
+  opt :key, "The 'Hero' key used for authentication", :type => :string, :required => true
+  opt :game_id, "The ID of the game", :type => :string, :required => true
+  opt :game_key, "The key of the game", :type => :string, :required => true
+  opt :base_url, "The URL of the Flox service", :type => :string
+  opt :destination, "The directory in which to store the logs", :type => :string
+  opt :query, "Narrows down the list of results", :type => :string
+  opt :limit, "Maximum number of logs to download", :type => :int
+end
+
+commands = ARGV.clone
+# puts "Optons: #{options}"
+
+hero_key = options[:key]
+game_id  = options[:game_id]
+game_key = options[:game_key]
+base_url = options[:base_url] || Flox::DEFAULT_URL
+
+worker = Worker.new(game_id, game_key, base_url)
+worker.login_with_key(hero_key)
+
+commands.each do |command|
+  worker.execute(command, options)
+end
