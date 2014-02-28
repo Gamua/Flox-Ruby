@@ -8,8 +8,8 @@ Flox is a server backend especially for game developers, providing all the basic
 
 While you can communicate with our servers directly via REST, we provide powerful SDKs for the most popular development platforms, including advanced features like offline-support and data caching. With these SDKs, integrating Flox into your game is just a matter of minutes.
 
-More information about Flox can be found here:
-[Flox, the No-Fuzz Game Backend](http://www.flox.cc)
+* More information about Flox can be found here: [Flox, the No-Fuzz Game Backend](http://www.flox.cc)
+* The source code of the Ruby SDK ist hosted on [GitHub](https://github.com/Gamua/Flox-Ruby)
 
 ## How to install the Flox Gem
 
