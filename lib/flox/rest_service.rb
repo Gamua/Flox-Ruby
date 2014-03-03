@@ -3,7 +3,6 @@
 ## License:   Simplified BSD
 
 require 'json'
-require 'yaml'
 require 'net/http'
 
 # A class that makes it easy to communicate with the Flox server via a REST protocol.
