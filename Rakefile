@@ -41,7 +41,8 @@ end
 
 def bump_version(part)
 
-  filename = "lib/flox.version.rb"
+  filename = "lib/flox/version.rb"
+  new_version = nil
   all_lines = ""
 
   File.readlines(filename).each do |line|
@@ -55,14 +56,13 @@ def bump_version(part)
       else                      patch += 1
       end
 
-      all_lines += "  VERSION = '#{major}.#{minor}.#{patch}'\n"
+      new_version = "#{major}.#{minor}.#{patch}"
+      all_lines += "  VERSION = '#{new_version}'\n"
     else
       all_lines += line
     end
   end
 
-  File.open(filename, 'w') do |file|
-    file.write(all_lines)
-  end
+  File.open(filename, 'w') { |f| f.write all_lines } if new_version
 
 end
