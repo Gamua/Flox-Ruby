@@ -97,6 +97,17 @@ class FloxTest < Test::Unit::TestCase
     assert_equal(data["name"], entity["name"])
   end
 
+  def test_load_player
+    id = "id"
+    data = { "name" => "Jean-Luc" }
+    flox.service.expects(:get).once.returns(data)
+    player = flox.load_player(id)
+    assert_kind_of(Flox::Player, player)
+    assert_equal(data["name"], player["name"])
+    assert_equal(id, player.id)
+    assert_equal('.player', player.type)
+  end
+
   def test_save_entity
     data   = { "name" => "Jean-Luc" }
     entity = Flox::Entity.new("type", "id", data)
