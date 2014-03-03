@@ -1,6 +1,7 @@
 # Flox Tools for Ruby
 
 [![Gem Version](https://badge.fury.io/rb/flox.png)](http://badge.fury.io/rb/flox)
+[![Build Status](https://travis-ci.org/Gamua/Flox-Ruby.png?branch=master)](https://travis-ci.org/Gamua/Flox-Ruby)
 
 ## What is Flox?
 
