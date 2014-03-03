@@ -79,6 +79,7 @@ class FloxTest < Test::Unit::TestCase
     assert_not_nil(player)
     assert_equal(:guest, player.auth_type)
     assert_equal(player, flox.current_player)
+    assert_not_nil(player.id)
   end
 
   def test_load_entity

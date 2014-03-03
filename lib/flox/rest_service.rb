@@ -22,7 +22,7 @@ class Flox::RestService
     @game_id = game_id
     @game_key = game_key
     @base_url = base_url
-    @authentication = { "authType" => "guest" }
+    login :guest
   end
 
   # Makes a `GET` request at the server. The given data-Hash is URI-encoded
@@ -64,12 +64,12 @@ class Flox::RestService
     auth_data = {
       "authType"  => auth_type,
       "authId"    => auth_id,
-      "authToken" => auth_token,
-      "id"        => auth_id
+      "authToken" => auth_token
     }
 
     if (auth_type.to_sym == :guest)
       response = auth_data
+      auth_data["id"] = String.random_uid
     else
       response = post("authenticate", auth_data)
       auth_data["id"] = response["id"]
