@@ -23,3 +23,46 @@ task :clobber_yard do
   FileUtils.rm_rf('doc', :verbose=>true)
   FileUtils.rm_rf('.yardoc', :verbose=>true)
 end
+
+namespace "bump" do
+
+  desc 'Raises the major version'
+  task(:major) { bump_version(:major) }
+
+  desc 'Raises the minor version'
+  task(:minor) { bump_version(:patch) }
+
+  desc 'Raises the patch version'
+  task(:patch) { bump_version(:patch) }
+
+end
+
+## Helpers
+
+def bump_version(part)
+
+  filename = "lib/flox.version.rb"
+  all_lines = ""
+
+  File.readlines(filename).each do |line|
+
+    matches = /VERSION\s?=\s?[\"'](\d+\.\d+\.\d+)[\"']/.match(line)
+    if matches
+      major, minor, patch = *matches[0].split('.').map { |v| v.to_i }
+
+      if    part == :major then major += 1
+      elsif part == :minor then minor += 1
+      else                      patch += 1
+      end
+
+      all_lines += "  VERSION = '#{major}.#{minor}.#{patch}'\n"
+    else
+      all_lines += line
+    end
+  end
+
+  File.open(filename, 'w') do |file|
+    file.write(all_lines)
+  end
+
+end
