@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.author      = 'Daniel Sperl'
   s.email       = 'daniel@gamua.com'
   s.files       = Dir.glob('{bin,test,lib}/**/*')
+  s.executables = 'flox'
   s.homepage    = 'https://www.flox.cc'
   s.license     = 'Simplified BSD'
   s.summary     = 'Ruby SDK for the flox.cc game backend'
@@ -22,6 +23,7 @@ its bundled command-line utility.
   EOF
 
   s.add_runtime_dependency 'json'
+  s.add_runtime_dependency 'slop', '~> 3.4.7'
   s.add_development_dependency 'mocha', '~> 1.0'
   s.add_development_dependency 'yard',  '~> 0.8'
   s.add_development_dependency 'rake'
