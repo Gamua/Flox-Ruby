@@ -72,7 +72,7 @@ begin
   Slop.parse(ARGV, :help => true) do
 
     on :v, "version", 'Print the current version of the Flox Gem.' do
-      "Gamua Flox v#{Flox::VERSION}"
+      puts "Gamua Flox v#{Flox::VERSION}"
     end
 
     command "load_logs" do
