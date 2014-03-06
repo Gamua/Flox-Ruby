@@ -30,7 +30,7 @@ namespace "bump" do
   task(:major) { bump_version(:major) }
 
   desc 'Raises the minor version'
-  task(:minor) { bump_version(:patch) }
+  task(:minor) { bump_version(:minor) }
 
   desc 'Raises the patch version'
   task(:patch) { bump_version(:patch) }
