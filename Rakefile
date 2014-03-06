@@ -51,10 +51,9 @@ def bump_version(part)
     if matches
       major, minor, patch = *matches[0].split('.').map { |v| v.to_i }
 
-      if    part == :major then major += 1
-      elsif part == :minor then minor += 1
-      else                      patch += 1
-      end
+      if part == :major then major += 1; minor = 0; patch = 0 end
+      if part == :minor then minor += 1; patch = 0 end
+      if part == :patch then patch += 1; end
 
       new_version = "#{major}.#{minor}.#{patch}"
       all_lines += "  VERSION = '#{new_version}'\n"
@@ -63,6 +62,9 @@ def bump_version(part)
     end
   end
 
-  File.open(filename, 'w') { |f| f.write all_lines } if new_version
+  if new_version
+    File.open(filename, 'w') { |f| f.write all_lines }
+    puts "New Version: #{new_version}"
+  end
 
 end
