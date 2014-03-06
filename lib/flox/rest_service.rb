@@ -115,7 +115,7 @@ class Flox::RestService
         rescue
           response.body
         end
-        raise message
+        raise Flox::Error, message
       end
     end
   end

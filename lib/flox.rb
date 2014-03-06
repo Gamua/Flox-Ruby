@@ -8,6 +8,9 @@
 # of all players.
 class Flox
 
+  # The main Error class, all Exception classes inherit from this class.
+  class Error < StandardError; end
+
   # The URL where the Flox servers are found.
   DEFAULT_URL = "https://www.flox.cc"
 
