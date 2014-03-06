@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.date        = '2014-02-21'
   s.author      = 'Daniel Sperl'
   s.email       = 'daniel@gamua.com'
-  s.files       = Dir.glob('{bin,test,lib}/**/*')
+  s.files       = ["README.md", "LICENSE.md", ".yardopts"] + Dir.glob('{bin,test,lib}/**/*')
   s.executables = 'flox'
   s.homepage    = 'https://www.flox.cc'
   s.license     = 'Simplified BSD'
