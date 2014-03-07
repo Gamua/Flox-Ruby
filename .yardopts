@@ -1,3 +1,4 @@
 --readme README.md
 --title 'Flox-Ruby API Documentation'
 --markup markdown
+--no-private
