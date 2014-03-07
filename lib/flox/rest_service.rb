@@ -3,6 +3,8 @@
 ## License:   Simplified BSD
 
 require 'json'
+require 'zlib'
+require 'base64'
 require 'net/http'
 
 # A class that makes it easy to communicate with the Flox server via a REST protocol.
@@ -61,17 +63,20 @@ class Flox::RestService
   # @return the server response.
   def login(auth_type, auth_id=nil, auth_token=nil)
     auth_data = {
-      "authType"  => auth_type,
-      "authId"    => auth_id,
-      "authToken" => auth_token
+      :authType  => auth_type,
+      :authId    => auth_id,
+      :authToken => auth_token
     }
 
     if (auth_type.to_sym == :guest)
       response = auth_data
-      auth_data["id"] = String.random_uid
+      auth_data[:id] = String.random_uid
     else
+      if @authentication[:authType] == :guest
+        auth_data[:id] = @authentication[:id]
+      end
       response = post("authenticate", auth_data)
-      auth_data["id"] = response["id"]
+      auth_data[:id] = response["id"]
     end
 
     @authentication = auth_data
@@ -90,12 +95,13 @@ class Flox::RestService
       "sdk" => { "type" => "ruby", "version" => Flox::VERSION },
       "gameKey" => @game_key,
       "dispatchTime" => Time.now.utc.to_xs_datetime,
+      "bodyCompression" => "zlib",
       "player" => @authentication
     }
 
     request["Content-Type"] = "application/json"
     request["X-Flox"] = flox_header.to_json
-    request.body = data.to_json if data
+    request.body = encode(data.to_json) if data
 
     uri = URI.parse(@base_url)
     http = Net::HTTP::new(uri.host, uri.port)
@@ -107,17 +113,30 @@ class Flox::RestService
 
     http.start do |session|
       response = session.request(request)
+      body = response.body
+      body = decode(body) if response['x-content-encoding'] == 'zlib'
+
       if (response.is_a? Net::HTTPSuccess)
-        return JSON.parse(response.body || '{}')
+        return JSON.parse(body || '{}')
       else
         message = begin
-          JSON.parse(response.body)['message']
+          JSON.parse(body)['message']
         rescue
-          response.body
+          body
         end
         raise Flox::Error, message
       end
     end
+  end
+
+  def decode(string)
+    return nil if string.nil? or string.empty?
+    Zlib::Inflate.inflate(Base64.decode64(string))
+  end
+
+  def encode(string)
+    return nil if string.nil?
+    Base64.encode64(Zlib::Deflate.deflate(string))
   end
 
   def full_path(path)
