@@ -10,7 +10,7 @@ require 'time'
 # The class extends `Hash`. Thus, all properties of the Entity can be accessed
 # as keys of the Entity instance.
 #
-#     entity['name'] = 'Donald Duck'
+#     entity[:name] = 'Donald Duck'
 #
 # For convenience, the standard entity properties (e.g. `created_at` and
 # `updated_at`)can be accessed via Ruby attributes.
@@ -19,7 +19,7 @@ require 'time'
 #
 # To load and save an entity, use the respective methods on the Flox class.
 #
-#     my_entity = flox.load_entity('SaveGame', '12345') # => Flox::Entity
+#     my_entity = flox.load_entity(:SaveGame, '12345') # => Flox::Entity
 #     flox.save_entity(my_entity)
 #
 class Flox::Entity < Hash
@@ -36,33 +36,36 @@ class Flox::Entity < Hash
   def initialize(type, id=nil, data=nil)
     @type = type
     @id = id ? id : String.random_uid
-    self['createdAt'] = self['updatedAt'] = Time.now.utc.to_xs_datetime
-    self.public_access = ''
-    self.merge!(data) if data
+    self[:createdAt] = self[:updatedAt] = Time.now.utc.to_xs_datetime
+    self[:publicAccess] = ''
+    if (data)
+      data_sym = Hash[data.map{|k, v| [k.to_sym, v]}]
+      self.merge!(data_sym)
+    end
   end
 
   def created_at
-    Time.parse self['createdAt']
+    Time.parse self[:createdAt]
   end
 
   def updated_at
-    Time.parse self['updatedAt']
+    Time.parse self[:updatedAt]
   end
 
   def public_access
-    self["publicAccess"]
+    self[:publicAccess]
   end
 
   def public_access=(access)
-    self["publicAccess"] = access.to_s
+    self[:publicAccess] = access.to_s
   end
 
   def owner_id
-    self["ownerId"]
+    self[:ownerId]
   end
 
   def owner_id=(value)
-    self["ownerId"] = value.to_s
+    self[:ownerId] = value.to_s
   end
 
   def path
@@ -76,6 +79,16 @@ class Flox::Entity < Hash
       description += "    #{key}: #{value}\n"
     end
     description += "]"
+  end
+
+  # Accesses a property of the entity; both symbols and strings work.
+  def [](key)
+    super(key.to_sym)
+  end
+
+  # (see #[])
+  def []=(key, value)
+    super(key.to_sym, value)
   end
 
   #

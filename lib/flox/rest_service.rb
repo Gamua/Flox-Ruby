@@ -92,11 +92,11 @@ class Flox::RestService
 
   def execute(request, data=nil)
     flox_header = {
-      "sdk" => { "type" => "ruby", "version" => Flox::VERSION },
-      "gameKey" => @game_key,
-      "dispatchTime" => Time.now.utc.to_xs_datetime,
-      "bodyCompression" => "zlib",
-      "player" => @authentication
+      :sdk => { :type => "ruby", :version => Flox::VERSION },
+      :gameKey => @game_key,
+      :dispatchTime => Time.now.utc.to_xs_datetime,
+      :bodyCompression => "zlib",
+      :player => @authentication
     }
 
     request["Content-Type"] = "application/json"
@@ -117,7 +117,7 @@ class Flox::RestService
       body = decode(body) if response['x-content-encoding'] == 'zlib'
 
       if (response.is_a? Net::HTTPSuccess)
-        return JSON.parse(body || '{}')
+        return JSON.parse(body || '{}', {symbolize_names: true})
       else
         message = begin
           JSON.parse(body)['message']

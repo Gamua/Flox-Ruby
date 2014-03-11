@@ -135,7 +135,7 @@ class FloxTest < Test::Unit::TestCase
     result = { 'ids' => log_ids, 'cursor' => nil }
     flox.service.expects(:get).at_most_once.returns(result)
     logs = flox.load_logs(':warning', 50)
-    assert_kind_of(Flox::ResourceEnumerator, logs)
+    assert_kind_of(Flox::ResultSet, logs)
     assert_equal(log_ids.length, logs.length)
     flox.service.expects(:get).times(log_ids.length).returns({})
     logs.each { |log| assert_kind_of(Hash, log) }

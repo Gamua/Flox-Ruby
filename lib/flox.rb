@@ -58,11 +58,7 @@ class Flox
   def load_entity(type, id)
     path = entity_path(type, id)
     data = service.get(path)
-    if (type == '.player')
-      Player.new(id, data)
-    else
-      Entity.new(type, id, data)
-    end
+    create_entity(type, id, data)
   end
 
   # Loads an entity with type '.player'.
@@ -144,11 +140,10 @@ class Flox
   # * `severity:error` → all logs of type error
   # * `day:2014-02-20 severity:error` → all error logs from February 20th.
   #
-  # @return [Flox::ResourceEnumerator<Hash>]
+  # @return [Flox::ResultSet<Hash>]
   def load_logs(query=nil, limit=nil)
     log_ids = load_log_ids(query, limit)
-    paths = log_ids.map { |log_id| log_path(log_id) }
-    ResourceEnumerator.new(service, paths)
+    ResultSet.new(service, "logs", log_ids)
   end
 
   # Loads just the IDs of the logs, defined by a certain query.
@@ -168,6 +163,27 @@ class Flox
       limit -= log_ids.length if limit
     end while !cursor.nil? and (limit.nil? or limit > 0)
     log_ids
+  end
+
+  # Executes a query over Entities, using a simple SQL-like syntax.
+  # @see Flox::Query
+  #
+  # @overload find_entities(query)
+  #   @param query [Flox::Query] the query to execute
+  # @overload find_entities(entity_type, constraints=nil, *args)
+  #   @param type [String, Symbol, Class] the type of the entity
+  #   @param query [String] the query string with optional '?' placeholders
+  def find_entities(*query)
+    unless (query.kind_of? Flox::Query)
+      query = Flox::Query.new(query[0], query[1], *query[2..-1])
+    end
+
+    path = "entities/#{query.type}"
+    data = { where: query.constraints, offset: query.offset, limit: query.limit }
+    results = service.post(path, data).map {|e| e[:id]}
+    ResultSet.new service, path, results do |id, data|
+      create_entity(query.type, id, data)
+    end
   end
 
   # Loads the status of the Flox service.
@@ -213,12 +229,21 @@ class Flox
     "logs/#{log_id}"
   end
 
+  def create_entity(type, id, data)
+    if (type == '.player' or type == Flox::Player)
+      Player.new(id, data)
+    else
+      Entity.new(type, id, data)
+    end
+  end
+
 end
 
-require 'flox/version'
-require 'flox/utils'
 require 'flox/rest_service'
+require 'flox/result_set'
+require 'flox/version'
 require 'flox/entity'
 require 'flox/player'
 require 'flox/score'
-require 'flox/resource_enumerator'
+require 'flox/query'
+require 'flox/utils'

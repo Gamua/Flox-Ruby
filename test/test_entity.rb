@@ -49,4 +49,15 @@ class EntityTest < Test::Unit::TestCase
     assert_equal('rw', entity.public_access)
   end
 
+  def test_accepts_string_or_symbol
+    first_name = 'donald'
+    last_name  = 'duck'
+    entity = Flox::Entity.new('type', 'id',
+      { first_name: first_name, "last_name" => last_name })
+    assert_equal(first_name, entity[:first_name])
+    assert_equal(first_name, entity['first_name'])
+    assert_equal(last_name, entity[:last_name])
+    assert_equal(last_name, entity['last_name'])
+  end
+
 end
