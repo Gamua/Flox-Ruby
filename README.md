@@ -68,10 +68,10 @@ We're done with the preparations! Now let's look at some of the things you can d
 
 ### Loading logs
 
-    # load all logs from a certain day that contain a warning or error
-    logs = flox.load_logs('day:2014-02-22 warning')
+    # find all logs from a certain day that contain a warning or error
+    logs = flox.find_logs('day:2014-02-22 severity:warning')
     num_logs = logs.length
-    logs.each { |log| puts log['duration'] }
+    logs.each { |log| puts log[:duration] }
 
 ## Where to go from here:
 
