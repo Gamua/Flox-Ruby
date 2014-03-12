@@ -8,9 +8,6 @@
 # of all players.
 class Flox
 
-  # The main Error class, all Exception classes inherit from this class.
-  class Error < StandardError; end
-
   # The URL where the Flox servers are found.
   DEFAULT_URL = "https://www.flox.cc"
 
@@ -265,6 +262,7 @@ end
 
 require 'flox/rest_service'
 require 'flox/version'
+require 'flox/errors'
 require 'flox/entity'
 require 'flox/player'
 require 'flox/score'
