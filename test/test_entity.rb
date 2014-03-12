@@ -30,7 +30,7 @@ class EntityTest < Test::Unit::TestCase
     created_at = Time.parse("2014-02-20T11:00:00Z")
     created_at_string = created_at.to_xs_datetime
     entity = Flox::Entity.new('type', 'id')
-    entity['createdAt'] = created_at_string
+    entity[:createdAt] = created_at_string
     assert_equal(created_at, entity.created_at)
   end
 
@@ -38,7 +38,7 @@ class EntityTest < Test::Unit::TestCase
     updated_at = Time.parse("2014-02-20T11:00:00Z")
     updated_at_string = updated_at.to_xs_datetime
     entity = Flox::Entity.new('type', 'id')
-    entity['updatedAt'] = updated_at_string
+    entity[:updatedAt] = updated_at_string
     assert_equal(updated_at, entity.updated_at)
   end
 

@@ -53,7 +53,7 @@ We're done with the preparations! Now let's look at some of the things you can d
     entity = flox.load_entity('entity-type', 'entity-id') # => Flox::Entity
 
     # modify it via the []-operator
-    entity['myProperty'] = 'something'
+    entity[:myProperty] = 'something'
 
     # save or delete at will
     flox.save_entity(entity)

@@ -46,7 +46,7 @@ class Flox
   # @private
   def login(auth_type, auth_id=nil, auth_token=nil)
       data = service.login(auth_type, auth_id, auth_token)
-      @current_player = Player.new(data['id'], data['entity'])
+      @current_player = Player.new(data[:id], data[:entity])
   end
 
   # Loads an entity with a certain type and id from the server.
@@ -68,8 +68,8 @@ class Flox
   # @return [Flox::Entity]
   def save_entity(entity)
     result = service.put(entity.path, entity)
-    entity['updatedAt'] = result['updatedAt']
-    entity['createdAt'] = result['createdAt']
+    entity[:updatedAt] = result[:updatedAt]
+    entity[:createdAt] = result[:createdAt]
     entity
   end
 
@@ -105,9 +105,9 @@ class Flox
     args = {}
 
     if scope.is_a?(Array)
-      args['p'] = scope
+      args[:p] = scope
     else
-      args['t'] = scope.to_s.to_camelcase
+      args[:t] = scope.to_s.to_camelcase
     end
 
     raw_scores = service.get(path, args)
@@ -162,13 +162,13 @@ class Flox
     cursor = nil
     begin
       args = {}
-      args['q'] = query  if query
-      args['l'] = limit  if limit
-      args['c'] = cursor if cursor
+      args[:q] = query  if query
+      args[:l] = limit  if limit
+      args[:c] = cursor if cursor
 
       result = service.get "logs", args
-      cursor = result["cursor"]
-      log_ids += result["ids"]
+      cursor = result[:cursor]
+      log_ids += result[:ids]
       limit -= log_ids.length if limit
     end while !cursor.nil? and (limit.nil? or limit > 0)
     log_ids

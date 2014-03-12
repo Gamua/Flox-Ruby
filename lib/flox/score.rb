@@ -24,11 +24,11 @@ class Flox::Score
 
   # @param data [Hash] the contents of the score as given by the Flox server.
   def initialize(data)
-    @player_id = data['playerId'].to_s
-    @player_name = data['playerName'].to_s
-    @value = data['value'].to_i
-    @country = data['country'].to_s
-    @created_at = Time.parse(data['createdAt'].to_s)
+    @player_id = data[:playerId].to_s
+    @player_name = data[:playerName].to_s
+    @value = data[:value].to_i
+    @country = data[:country].to_s
+    @created_at = Time.parse(data[:createdAt].to_s)
   end
 
 end

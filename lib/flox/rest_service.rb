@@ -133,7 +133,7 @@ class Flox::RestService
         auth_data[:id] = @authentication[:id]
       end
       response = post("authenticate", auth_data)
-      auth_data[:id] = response["id"]
+      auth_data[:id] = response[:id]
     end
 
     @authentication = auth_data

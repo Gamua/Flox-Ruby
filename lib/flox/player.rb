@@ -23,14 +23,14 @@ class Flox::Player < Flox::Entity
   # is always `.player` in Flox.
   def initialize(id=nil, data=nil)
     data ||= {}
-    data["authType"] ||= "guest"
-    data["publicAccess"] ||= "r"
+    data[:authType] ||= "guest"
+    data[:publicAccess] ||= "r"
     super(".player", id, data)
     self.owner_id ||= self.id
   end
 
   def auth_type
-    self["authType"].to_sym
+    self[:authType].to_sym
   end
 
   #
