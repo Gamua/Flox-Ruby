@@ -256,8 +256,8 @@ class Flox
   end
 
   def create_query(*query)
-    unless (query.kind_of? Flox::Query)
-      query = Flox::Query.new(query[0], query[1], *query[2..-1])
+    if query[0].kind_of? Flox::Query then query[0]
+    else Flox::Query.new(query[0], query[1], *query[2..-1])
     end
   end
 
