@@ -124,15 +124,26 @@ class Flox
     service.get(path, args)
   end
 
+  # Loads a bulk of resources from a certain path, optionally feeding them
+  # through a block.
+  # @yield [id, resource] called on every resource; the return-value is feeded
+  #                       into the result array.
+  # @return [Array]
+  def load_resources(path, ids)
+    ids.map do |id|
+      resource = load_resource "#{path}/#{id}"
+      resource = yield id, resource if block_given?
+      resource
+    end
+  end
+
   # Loads a log with a certain ID. A log is a Hash instance.
   # @return [Hash]
   def load_log(log_id)
-    log = service.get log_path(log_id)
-    log['id'] = log_id unless log['id']
-    log
+    service.get log_path(log_id)
   end
 
-  # Loads logs defined by a certain query.
+  # Finds logs defined by a certain query.
   # Here are some sample queries:
   #
   # * `day:2014-02-20` → all logs of a certain day
@@ -140,15 +151,16 @@ class Flox
   # * `severity:error` → all logs of type error
   # * `day:2014-02-20 severity:error` → all error logs from February 20th.
   #
-  # @return [Flox::ResultSet<Hash>]
-  def load_logs(query=nil, limit=nil)
-    log_ids = load_log_ids(query, limit)
-    ResultSet.new(service, "logs", log_ids)
+  # @return [Array<Hash>]
+  def find_logs(query=nil, limit=nil)
+    log_ids = find_log_ids(query, limit)
+    load_resources('logs', log_ids)
   end
 
-  # Loads just the IDs of the logs, defined by a certain query.
+  # Finds just the IDs of the logs, defined by a certain query.
+  # @see {#find_logs}
   # @return [Array<String>]
-  def load_log_ids(query=nil, limit=nil)
+  def find_log_ids(query=nil, limit=nil)
     log_ids = []
     cursor = nil
     begin
@@ -174,16 +186,22 @@ class Flox
   #   @param type [String, Symbol, Class] the type of the entity
   #   @param query [String] the query string with optional '?' placeholders
   def find_entities(*query)
-    unless (query.kind_of? Flox::Query)
-      query = Flox::Query.new(query[0], query[1], *query[2..-1])
-    end
-
-    path = "entities/#{query.type}"
-    data = { where: query.constraints, offset: query.offset, limit: query.limit }
-    results = service.post(path, data).map {|e| e[:id]}
-    ResultSet.new service, path, results do |id, data|
+    query = create_query(*query)
+    ids = find_entity_ids(query)
+    load_resources "entities/#{query.type}", ids do |id, data|
       create_entity(query.type, id, data)
     end
+  end
+
+  # Executes a query over Entities, using a simple SQL-like syntax.
+  # @return [Array<String>]
+  # @see #find_entities
+  # @see Flox::Query
+  def find_entity_ids(*query)
+    query = create_query(*query)
+    path = "entities/#{query.type}"
+    data = { where: query.constraints, offset: query.offset, limit: query.limit }
+    service.post(path, data).map {|e| e[:id]}
   end
 
   # Loads the status of the Flox service.
@@ -237,10 +255,15 @@ class Flox
     end
   end
 
+  def create_query(*query)
+    unless (query.kind_of? Flox::Query)
+      query = Flox::Query.new(query[0], query[1], *query[2..-1])
+    end
+  end
+
 end
 
 require 'flox/rest_service'
-require 'flox/result_set'
 require 'flox/version'
 require 'flox/entity'
 require 'flox/player'

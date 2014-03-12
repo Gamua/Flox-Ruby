@@ -32,7 +32,7 @@ class Worker
     FileUtils.mkdir_p(destination)
 
     print "Loading log IDs (this could take a moment) ... "
-    log_ids = flox.load_log_ids(query, limit)
+    log_ids = flox.find_log_ids(query, limit)
     puts "found #{log_ids.length} logs."
     log_ids.each do |log_id|
       remote_path = "logs/#{log_id}"

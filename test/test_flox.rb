@@ -133,11 +133,11 @@ class FloxTest < Test::Unit::TestCase
   def test_find_logs
     log_ids = %w{ 0 1 2 }
     result = { 'ids' => log_ids, 'cursor' => nil }
-    flox.service.expects(:get).at_most_once.returns(result)
-    logs = flox.load_logs(':warning', 50)
-    assert_kind_of(Flox::ResultSet, logs)
+
+    flox.service.expects(:get).times(4).returns(result).then.returns({})
+    logs = flox.find_logs(':warning', 50)
+    assert_kind_of(Array, logs)
     assert_equal(log_ids.length, logs.length)
-    flox.service.expects(:get).times(log_ids.length).returns({})
     logs.each { |log| assert_kind_of(Hash, log) }
   end
 
@@ -150,14 +150,14 @@ class FloxTest < Test::Unit::TestCase
 
     # without limit
     flox.service.expects(:get).twice.returns(result_a, result_b)
-    out_log_ids = flox.load_log_ids
+    out_log_ids = flox.find_log_ids
     assert_equal(log_ids.length, out_log_ids.length)
 
     # with limit
     limit = 7
     result_b['ids'] = %w{ 5 6 }
     flox.service.expects(:get).twice.returns(result_a, result_b)
-    out_log_ids = flox.load_log_ids(nil, limit)
+    out_log_ids = flox.find_log_ids(nil, limit)
     assert_equal(limit, out_log_ids.length)
   end
 

@@ -45,16 +45,15 @@ class FloxTest < Test::Unit::TestCase
   def test_run_query
     flox = Flox.new("game_id", "game_key")
     query = Flox::Query.new("Type", "score > ?", 100)
-    flox.service.expects(:execute).once.returns([{id: 1}, {id: 2}])
+    flox.service.expects(:execute).times(3).returns([{id: 1}, {id: 2}])
+      .then.returns({score: 101}, {score: 102})
     results = flox.find_entities query
     assert_equal 2, results.length
 
-    flox.service.expects(:get).once.returns({score: 101})
     result_0 = results[0]
     assert_kind_of(Flox::Entity, result_0)
     assert_equal(101, result_0[:score])
 
-    flox.service.expects(:get).once.returns({score: 102})
     result_1 = results[1]
     assert_kind_of(Flox::Entity, result_1)
     assert_equal(102, result_1[:score])
@@ -62,7 +61,8 @@ class FloxTest < Test::Unit::TestCase
 
   def test_run_query_direct
     flox = Flox.new("game_id", "game_key")
-    flox.service.expects(:execute).once.returns([{id: 1}, {id: 2}])
+    flox.service.expects(:execute).times(3).returns([{id: 1}, {id: 2}])
+      .then.returns({}, {})
     results = flox.find_entities "Type", "score > ?", 100
     assert_equal 2, results.length
   end

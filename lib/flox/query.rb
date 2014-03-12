@@ -71,7 +71,7 @@ class Flox::Query
   #     # -> name IN ["alfa", "bravo", "charlie"]
   #
   # Note that subsequent calls to this method will replace preceding constraints.
-  # @return [Flox::ResultSet<Flox::Entity>]
+  # @return String the final constraints string
   def where(constraints, *args)
     @constraints = constraints.gsub(/\?/) do
       raise ArgumentError, "incorrect placeholder count" unless args.length > 0
