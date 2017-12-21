@@ -24,6 +24,7 @@ its bundled command-line utility.
 
   s.add_runtime_dependency 'json'
   s.add_runtime_dependency 'slop', '~> 3.4.7'
+  s.add_development_dependency 'test-unit'
   s.add_development_dependency 'mocha', '~> 1.0'
   s.add_development_dependency 'yard',  '~> 0.9.11'
   s.add_development_dependency 'rake'
