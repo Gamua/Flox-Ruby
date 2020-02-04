@@ -155,7 +155,7 @@ class Flox
   end
 
   # Finds just the IDs of the logs, defined by a certain query.
-  # @see {#find_logs}
+  # @see #find_logs
   # @return [Array<String>]
   def find_log_ids(query=nil, limit=nil)
     log_ids = []
@@ -197,7 +197,8 @@ class Flox
   def find_entity_ids(*query)
     query = create_query(*query)
     path = "entities/#{query.type}"
-    data = { where: query.constraints, offset: query.offset, limit: query.limit }
+    data = { where: query.constraints, offset: query.offset,
+             limit: query.limit, orderBy: query.order_by }
     service.post(path, data).map {|e| e[:id]}
   end
 

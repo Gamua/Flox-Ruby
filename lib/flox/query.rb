@@ -35,6 +35,9 @@ class Flox::Query
   # @return [Fixnum] the maximum number of returned entities.
   attr_accessor :limit
 
+  # @return [String] Order the results by a certain property, like 'price ASC' or 'name DESC'.
+  attr_accessor :order_by
+
   # @return [String] the entity type that is searched.
   attr_reader :type
 

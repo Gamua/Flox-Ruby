@@ -35,6 +35,12 @@ class FloxTest < Test::Unit::TestCase
     assert_equal(5, query.limit)
   end
 
+  def test_order_by
+    query = Flox::Query.new("Type")
+    query.order_by = "updated_at DESC"
+    assert_equal("updated_at DESC", query.order_by)
+  end
+
   def test_constraints_checks_argument_count
     query = Flox::Query.new("Type")
     assert_raise ArgumentError do
