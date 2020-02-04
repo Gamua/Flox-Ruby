@@ -12,7 +12,7 @@ class Flox::ServiceError < Flox::Error
   # @return [Net::HTTPResponse] the complete server response
   attr_reader :response
 
-  # @param code [String] the http status code
+  # @param response [Net::HTTPResponse] the complete server response
   def initialize(response)
     @response = response
   end
