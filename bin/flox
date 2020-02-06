@@ -4,18 +4,16 @@
 ## Copyright: Copyright 2014 Gamua
 ## License:   Simplified BSD
 
-require 'flox'
-require 'fileutils'
-require 'slop'
+require "flox"
+require "fileutils"
+require "slop"
 
-# Helper class that does the heavy lifting.
-class Worker
-
+class LogExporter
   attr_reader :flox
 
-  def initialize(args={})
+  def initialize(args = {})
     base_url = args[:url] || Flox::DEFAULT_URL
-    game_id  = args[:game_id]
+    game_id = args[:game_id]
     game_key = args[:game_key]
     hero_key = args[:hero_key]
 
@@ -25,7 +23,7 @@ class Worker
     puts "done."
   end
 
-  def load_logs(args={})
+  def run(args = {})
     query = args[:query]
     limit = args[:limit]
     destination = args[:destination] || Dir.pwd
@@ -52,7 +50,82 @@ class Worker
       puts("Saved #{local_path}")
     end
   end
+end
 
+class EntityExporter
+  def run(args = {})
+    base_url = args[:url] || Flox::DEFAULT_URL
+    game_id = args[:game_id]
+    game_key = args[:game_key]
+    hero_key = args[:hero_key]
+    entity_type = args[:type]
+
+    puts("Exporting entities of type '#{entity_type}'. Beware, this will take a while!")
+    puts("  -> Precondition: the entity MUST have an index on the property 'updatedAt'!")
+    puts("  -> If you stop and restart, the exporter will continue where it left off.")
+    puts("  -> Running the exporter again will download only the changed / new entities.")
+    print("Progress: ")
+
+    batch_size = 10
+    num_threads = 4
+    out_folder = "export/#{entity_type}"
+    FileUtils.mkdir_p out_folder
+
+    status_file = "#{out_folder}/_export_status.json"
+    start_index = File.exist?(status_file) ?
+      JSON.parse(IO.read(status_file))["index"].to_i : 0
+
+    thread_state = [start_index] * num_threads
+    signal_queue = Queue.new
+
+    threads = (0...num_threads).map do |thread_index|
+      Thread.new do
+        flox = Flox.new(game_id, game_key, base_url)
+        flox.login_with_key(hero_key)
+
+        query = Flox::Query.new(entity_type)
+        query.order_by = "updatedAt ASC"
+        query.limit = batch_size
+        query.offset = start_index + thread_index * batch_size
+        sleep thread_index
+
+        loop do
+          begin
+            signal_queue << { :thread_index => thread_index,
+                              :result_index => query.offset }
+            results = flox.find_entities(query)
+            break if results.count == 0
+            results.each do |player|
+              IO.write("#{out_folder}/#{player.id}.json", player.to_json)
+            end
+          rescue StandardError => e
+            print "\nError: #{e.message}"
+            if e.message.include? "index is missing"
+              abort("\n")
+            else
+              puts " - retrying."
+            end
+          else
+            query.offset += batch_size * num_threads
+            print "."
+          end
+        end
+      end
+    end
+
+    signal_thread = Thread.new do
+      while thread_signal = signal_queue.pop
+        thread_state[thread_signal[:thread_index]] = thread_signal[:result_index]
+        smallest_index = thread_state.min
+        IO.write(status_file, { :index => smallest_index }.to_json)
+      end
+    end
+
+    threads.each { |thr| thr.join }
+    signal_queue.close
+
+    puts "\nExport completed!"
+  end
 end
 
 #
@@ -67,11 +140,9 @@ def shared_options
 end
 
 begin
-
   ARGV << "-h" if ARGV.empty?
   Slop.parse(ARGV, :help => true) do
-
-    on :v, "version", 'Print the current version of the Flox Gem.' do
+    on :v, "version", "Print the current version of the Flox Gem." do
       puts "Gamua Flox v#{Flox::VERSION}"
     end
 
@@ -84,12 +155,21 @@ begin
       on :l, "limit=", "Maximum number of logs to download", as: Integer
 
       run do |opts, args|
-        Worker.new(opts).load_logs(opts)
+        LogExporter.new(opts).run(opts)
       end
     end
 
-  end
+    command "export_entities" do
+      description "Fetch all entitites of a specific type from the server."
 
+      shared_options
+      on :d, "type=", "The entity type", :required => true
+
+      run do |opts, args|
+        EntityExporter.new.run(opts)
+      end
+    end
+  end
 rescue Slop::Error, Flox::Error => error
   puts error
 end

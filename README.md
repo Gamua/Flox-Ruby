@@ -33,6 +33,12 @@ As an example, here's how to download all the log files of a certain day that ha
 
 Note that you need to authorize with a "Hero" key. A hero is a special Flox player that has super-user rights; create it in the Flox online interface.
 
+You can use that same key to export all the entities of a specific type. Like this:
+
+    flox export_entities --game_id="id" --game_key="key" --hero_key="key" --type="Player"
+
+This will download JSON files with all player data into a subfolder of the working directory. Beware: you will need to add an index for the "updatedAt" property to this entity type first (which is done in the online interface, as well). This makes it possible that repeating the same export will only download new and changed files.
+
 ## How to use the Flox SDK
 
 The Ruby client is designed to be used not in games, but in scripts that help you operate your games. You can use it e.g. to automatically download your leaderboards or certain entities for backup. It's also easy to utilize Flox via 'irb', allowing quick introspection into your server data.
